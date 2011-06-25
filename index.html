@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>PhoneGap!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+      <script src="jquery-1.6.1.min.js"></script>
+      <script src="phonegap.0.9.5.1.min.js"></script>
+      <script src="openEarsPlugin.js"></script>
+      <script type="text/javascript" charset="utf-8">
+
+        $(document).ready(function(){
+          $(document).bind('deviceready', function(){
+            openears = window.plugins.openEarsPlugin;
+            success = function(msg){
+                $('BODY').append('<h1>'+msg+'</h1>');
+            }
+            fail = function(msg){
+                $('BODY').append('<h1>'+msg+'</h1>');
+            }
+            openears.startAudioSession(success, fail);
+            openears.startListening();
+            //openears.suspendRecognition();
+            //openears.resumeRecognition();
+            //openears.stopListening();
+          });
+        })    
+        
+      </script>    
+  </head>
+  <body>
+    <div id='log'></div>
+  </body>
+</html>
