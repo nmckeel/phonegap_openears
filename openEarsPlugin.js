@@ -3,20 +3,31 @@
  */
 var OpenEarsPlugin = function() {};
 
+OpenEarsPlugin.prototype.callbacks = {};
+
+OpenEarsPlugin.prototype.setCallback = function(name, fn){
+    OpenEarsPlugin.prototype.callbacks[name] = fn;
+}
+
 OpenEarsPlugin.prototype.log = function(msg){
     $('#log').append('<h1>'+msg+'</h1>');
     PhoneGap.exec('openEarsPlugin.log',msg);
 };
 
-OpenEarsPlugin.prototype.startAudioSession = function(success, fail){
+OpenEarsPlugin.prototype.startAudioSession = function(){
     this.log('Starting Audio Session.');
-    PhoneGap.exec('openEarsPlugin.startAudioSession', GetFunctionName(success), GetFunctionName(fail));
+    PhoneGap.exec('openEarsPlugin.startAudioSession');
 };
 
-OpenEarsPlugin.prototype.startListening = function(){
+OpenEarsPlugin.prototype.startListeningWithLanguageModelAtPath = function(options){
     this.log('Starting Listening.');
-    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStartListening', 'foo');
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStartListeningWithLanguageModelAtPath',options.languagemodel, options.dictionary);
 };
+
+OpenEarsPlugin.prototype.changeLanguageModelToFile = function(options){
+    this.log("openEarsPLugin.js, Changing Language Model to "+options.languagemodel);
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerChangeLanguageModelToFile', options.languagemodel, options.dictionary);
+}
 
 OpenEarsPlugin.prototype.stopListening = function(){
     this.log('Stopping Listening.');
@@ -42,41 +53,3 @@ PhoneGap.addConstructor(function() {
 
 
 
-/**
-
-    function openEarsPlugin(){
-    var OpenEarsPlugin = this;
-    
-    OpenEarsPlugin.log = function(msg){
-        $('#log').append('<h1>'+msg+'</h1>');
-        PhoneGap.exec('openEarsPlugin.log',msg);
-    };
-
-    OpenEarsPlugin.startAudioSession = function(success, fail){
-        OpenEarsPlugin.log('Starting Audio Session.');
-        PhoneGap.exec('openEarsPlugin.startAudioSession', success, fail);
-    };
- 
-    OpenEarsPlugin.startListening = function(){
-        OpenEarsPlugin.log('Starting Listening.');
-        PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStartListening', 'foo');
-    };
-
-    OpenEarsPlugin.stopListening = function(){
-        OpenEarsPlugin.log('Stopping Listening.');
-        PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStopListening','foo');
-    };
-
-    OpenEarsPlugin.suspendRecognition = function(){
-        OpenEarsPlugin.log('Suspending Recognition.');
-        PhoneGap.exec('openEarsPlugin.pocketsphinxControllerSuspendRecognition','foo');
-    };
-
-    OpenEarsPlugin.resumeRecognition = function(){
-        OpenEarsPlugin.log('Resuming Recognition.');
-        PhoneGap.exec('openEarsPlugin.pocketsphinxControllerResumeRecognition','foo');
-    };
-
-}
-
-**/

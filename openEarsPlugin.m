@@ -32,7 +32,6 @@
     return pocket_sphinx_controller;
 }
 
-
 @synthesize openears_events_observer;
 -(OpenEarsEventsObserver *) openears_events_observer{
     if (openears_events_observer == nil){
@@ -41,12 +40,8 @@
     return openears_events_observer;
 }
 
-/*
- *  ++++++++++++++++++++++++++++++++++++++++
- *  Callbacks for the PhoneGap Plugin
- *  ++++++++++++++++++++++++++++++++++++++++
- */
-@synthesize successCallback, failCallback;
+@synthesize current_language_model;
+@synthesize current_dictionary;
 
 /*
  *  ++++++++++++++++++++++++++++++++++++++++
@@ -60,18 +55,9 @@
     // Start AudioSessionManager
     [self.audio_session_manager startAudioSession];
 
-    // OpenEarsEventsObserver too.
+    // This class will be the delegate of the OpenEarsEventsObserver object.
     [self.openears_events_observer setDelegate:self];
 
-    // Handle the callbacks for JS
-    NSUInteger argc = [arguments count];
-    if (argc < 1) {
-		return;	
-	}
-	self.successCallback = [arguments objectAtIndex:0];
-	if (argc > 1) {
-		self.failCallback = [arguments objectAtIndex:1];	
-	}
 
 }
 
@@ -86,16 +72,27 @@
 }
 
 
-/*
+/*  
  *  ++++++++++++++++++++++++++++++++++++++++
  *  PocketsphinxController methods
  *  ++++++++++++++++++++++++++++++++++++++++
  */
 
--(void)pocketsphinxControllerStartListening:(NSArray *)arguments withDict:(NSDictionary *)options{
-    NSString *lmPath = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], @"OpenEars1.languagemodel"];
-    NSString *dictionaryPath = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], @"OpenEars1.dic"];
-    [self.pocket_sphinx_controller startListeningWithLanguageModelAtPath:lmPath dictionaryAtPath:dictionaryPath languageModelIsJSGF:NO];
+-(void)pocketsphinxControllerStartListeningWithLanguageModelAtPath:(NSArray *)arguments withDict:(NSDictionary *)options{
+    self.current_language_model = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:0]];
+    self.current_dictionary = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:1]];
+    [self.pocket_sphinx_controller startListeningWithLanguageModelAtPath:self.current_language_model dictionaryAtPath:self.current_dictionary languageModelIsJSGF:NO];
+}
+
+-(void)pocketsphinxControllerChangeLanguageModelToFile:(NSArray *) arguments withDict:(NSDictionary *)options{
+    self.current_language_model = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:0]];
+    self.current_dictionary = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:1]];
+    NSLog(@"***************************");
+    NSLog(self.current_language_model);
+    NSLog(self.current_dictionary);
+    NSLog(@"***************************");
+    [self.pocket_sphinx_controller changeLanguageModelToFile:self.current_language_model withDictionary:self.current_dictionary];
+    
 }
 
 -(void)pocketsphinxControllerStopListening:(NSArray *)arguments withDict:(NSDictionary *)options{
@@ -113,18 +110,25 @@
 
 /*
  *  ++++++++++++++++++++++++++++++++++++++++
- *  OpenEarsEventsObserver methods
+ *  OpenEarsEventsObserver delegate methods
  *  ++++++++++++++++++++++++++++++++++++++++
  */
 
 - (void) pocketsphinxDidReceiveHypothesis:(NSString *)hypothesis recognitionScore:(NSString *)recognitionScore utteranceID:(NSString *)utteranceID {
     NSLog(@"Pocketsphinx received a hypothesis is %@ with a score of %@ and an ID of %@", hypothesis, recognitionScore, utteranceID);
-
-    NSString* jsCallBack = [NSString stringWithFormat:@"%@(\"%@\");", self.successCallback, hypothesis];
-	NSLog(jsCallBack);
-    [self writeJavascript: jsCallBack];
-
+    NSString* jsString = [[NSString alloc] initWithFormat:@"window.plugins.openEarsPlugin.callbacks.pocketsphinxDidReceiveHypothesis(\"%@\",%@,%@);",hypothesis,recognitionScore,utteranceID];
+    [self writeJavascript:jsString];
+	[jsString release];
 }
+
+// This doesn't appear to be working:
+//- (void) pocketsphinxDidChangeLanguageModelToFile:(NSString *)newLanguageModelPathAsString andDictionary:(NSString *)newDictionaryPathAsString {
+//	NSLog(@"Pocketsphinx is now using the following language model: \n%@ and the following dictionary: %@",newLanguageModelPathAsString,newDictionaryPathAsString);
+//    NSString* jsString = [[NSString alloc] initWithFormat:@"window.plugins.openEarsPlugin.callbacks.pocketsphinxDidChangeLanguageModelToFile(\"%@\");",newDictionaryPathAsString];
+//    NSLog(jsString);
+//    [self writeJavascript:jsString];
+//	[jsString release];
+//}
 
         // There are numerous other methods to implement here.
 
@@ -135,13 +139,13 @@
  *  ++++++++++++++++++++++++++++++++++++++++
  */
 
--(void)dealloc {
+-(void) dealloc {
     [audio_session_manager release];
     [pocket_sphinx_controller release];
     openears_events_observer.delegate = nil;
     [openears_events_observer release];
-    [successCallback release];
-    [failCallback release];
+    [current_language_model release];
+    [current_dictionary release];
     [super dealloc];
 }
 

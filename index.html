@@ -11,23 +11,45 @@
         $(document).ready(function(){
           $(document).bind('deviceready', function(){
             openears = window.plugins.openEarsPlugin;
-            success = function(msg){
+
+            openears.setCallback('pocketsphinxDidReceiveHypothesis', function(hypothesis, recognitionScore, utteranceID){
+                $('BODY').append('<h1>'+hypothesis+',&nbsp;&nbsp;'+recognitionScore+',&nbsp;&nbsp;'+utteranceID+'</h1>');
+            });
+
+            openears.setCallback('pocketsphinxDidChangeLanguageModelToFile', function(path){
+                $('BODY').append('<h1>Changed Language Model to Path: '+path+'</h1>');
+            });
+
+            function fail(msg){
                 $('BODY').append('<h1>'+msg+'</h1>');
             }
-            fail = function(msg){
-                $('BODY').append('<h1>'+msg+'</h1>');
+            var options = {
+                languagemodel: 'rhymbes1.languagemodel'
+              , dictionary: 'rhymbes1.dic'
             }
-            openears.startAudioSession(success, fail);
-            openears.startListening();
+            openears.startAudioSession();
+            openears.startListeningWithLanguageModelAtPath(options);
+                           
+            function change_language_model(){
+              var options = {
+                 languagemodel: 'rhymbes2.languagemodel'
+               , dictionary: 'rhymbes2.dic'
+              }
+              openears.changeLanguageModelToFile(options);
+            }
+            
             //openears.suspendRecognition();
             //openears.resumeRecognition();
             //openears.stopListening();
+            
+            $('#change').click(change_language_model);
+            
           });
         })    
         
       </script>    
   </head>
   <body>
-    <div id='log'></div>
+    <span id="change">Change Language Model</span>
   </body>
 </html>
