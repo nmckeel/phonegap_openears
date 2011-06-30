@@ -40,6 +40,14 @@
     return openears_events_observer;
 }
 
+@synthesize flite_controller;
+-(FliteController *) flite_controller{
+    if (flite_controller == nil){
+        flite_controller = [[FliteController alloc] init];
+    }
+    return flite_controller;
+}
+
 @synthesize current_language_model;
 @synthesize current_dictionary;
 
@@ -87,12 +95,7 @@
 -(void)pocketsphinxControllerChangeLanguageModelToFile:(NSArray *) arguments withDict:(NSDictionary *)options{
     self.current_language_model = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:0]];
     self.current_dictionary = [NSString stringWithFormat:@"%@/%@",[[NSBundle mainBundle] resourcePath], [arguments objectAtIndex:1]];
-    NSLog(@"***************************");
-    NSLog(self.current_language_model);
-    NSLog(self.current_dictionary);
-    NSLog(@"***************************");
     [self.pocket_sphinx_controller changeLanguageModelToFile:self.current_language_model withDictionary:self.current_dictionary];
-    
 }
 
 -(void)pocketsphinxControllerStopListening:(NSArray *)arguments withDict:(NSDictionary *)options{
@@ -107,6 +110,18 @@
     [self.pocket_sphinx_controller resumeRecognition];
 }
 
+/*
+ *  ++++++++++++++++++++++++++++++++++++++++
+ *  FliteController methods
+ *  ++++++++++++++++++++++++++++++++++++++++
+ */
+
+-(void)fliteControllerSay:(NSString *)phrase withDict:(NSDictionary *)options{
+    NSString* phrase_out = [[NSString alloc] initWithFormat:@"%@",phrase];
+    NSLog(phrase_out);
+    [self.flite_controller say:phrase_out withVoice:@"cmu_us_slt"];
+    [phrase_out release];
+}
 
 /*
  *  ++++++++++++++++++++++++++++++++++++++++

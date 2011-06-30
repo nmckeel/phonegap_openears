@@ -44,6 +44,10 @@ OpenEarsPlugin.prototype.resumeRecognition = function(){
     PhoneGap.exec('openEarsPlugin.pocketsphinxControllerResumeRecognition','foo');
 };
 
+OpenEarsPlugin.prototype.say = function(phrase){
+    PhoneGap.exec('openEarsPlugin.fliteControllerSay',phrase);
+};
+
 
 PhoneGap.addConstructor(function() {
     if(!window.plugins){window.plugins = {};}

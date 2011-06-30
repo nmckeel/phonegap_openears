@@ -13,6 +13,7 @@
             openears = window.plugins.openEarsPlugin;
 
             openears.setCallback('pocketsphinxDidReceiveHypothesis', function(hypothesis, recognitionScore, utteranceID){
+                openears.say(hypothesis);
                 $('BODY').append('<h1>'+hypothesis+',&nbsp;&nbsp;'+recognitionScore+',&nbsp;&nbsp;'+utteranceID+'</h1>');
             });
 
