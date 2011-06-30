@@ -48,9 +48,19 @@
     return flite_controller;
 }
 
+@synthesize language_model_generator;
+-(LanguageModelGenerator *) language_model_generator{
+    if (language_model_generator == nil){
+        language_model_generator = [[LanguageModelGenerator alloc] init];
+    }
+    return language_model_generator;
+}
+
+
 @synthesize current_language_model;
 @synthesize current_dictionary;
-
+@synthesize path_to_dynamic_language_model;
+@synthesize path_to_dynamic_grammar;
 /*
  *  ++++++++++++++++++++++++++++++++++++++++
  *  AudioSessionManager methods
@@ -118,10 +128,50 @@
 
 -(void)fliteControllerSay:(NSString *)phrase withDict:(NSDictionary *)options{
     NSString* phrase_out = [[NSString alloc] initWithFormat:@"%@",phrase];
-    NSLog(phrase_out);
     [self.flite_controller say:phrase_out withVoice:@"cmu_us_slt"];
     [phrase_out release];
 }
+
+/*
+ *  ++++++++++++++++++++++++++++++++++++++++
+ *  LanguageModelGenerator methods
+ *  ++++++++++++++++++++++++++++++++++++++++
+ */
+-(void)languageModelGeneratorGenerateLanguageModelFromArray:(NSArray *)arguments withDict:(NSDictionary *)options{
+   
+    NSString *languageArrayCSV = [arguments objectAtIndex:0];
+    NSArray *languageArray = [languageArrayCSV componentsSeparatedByString:@","];
+    
+	NSError *error = [self.language_model_generator generateLanguageModelFromArray:languageArray withFilesNamed:@"dynamic"];
+
+    NSDictionary *dynamicLanguageGenerationResultsDictionary = nil;
+    
+    if([error code] != noErr) {
+        NSLog(@"Dynamic language generator reported error %@", [error description]);
+    } else {
+		dynamicLanguageGenerationResultsDictionary = [error userInfo];
+        
+        NSString *lmFile = [dynamicLanguageGenerationResultsDictionary objectForKey:@"LMFile"];
+		NSString *dictionaryFile = [dynamicLanguageGenerationResultsDictionary objectForKey:@"DictionaryFile"];
+		NSString *lmPath = [dynamicLanguageGenerationResultsDictionary objectForKey:@"LMPath"];
+		NSString *dictionaryPath = [dynamicLanguageGenerationResultsDictionary objectForKey:@"DictionaryPath"];
+		
+		NSLog(@"Dynamic language generator completed successfully, you can find your new files %@\n and \n%@\n at the paths \n%@ \nand \n%@", lmFile,dictionaryFile,lmPath,dictionaryPath);	
+    
+        self.path_to_dynamic_language_model = lmPath;
+        self.path_to_dynamic_grammar = dictionaryPath;
+    
+    }
+    //[languageArray release];
+    if(dynamicLanguageGenerationResultsDictionary){
+        NSLog(@"Switching to new lm.");
+        NSLog(@"%@",self.path_to_dynamic_language_model);
+        NSLog(@"%@",self.path_to_dynamic_grammar);
+        [self.pocket_sphinx_controller startListeningWithLanguageModelAtPath:self.path_to_dynamic_language_model dictionaryAtPath:self.path_to_dynamic_grammar languageModelIsJSGF:NO];
+    }
+
+}
+
 
 /*
  *  ++++++++++++++++++++++++++++++++++++++++
@@ -161,6 +211,8 @@
     [openears_events_observer release];
     [current_language_model release];
     [current_dictionary release];
+    [path_to_dynamic_language_model release];
+    [path_to_dynamic_grammar release];
     [super dealloc];
 }
 

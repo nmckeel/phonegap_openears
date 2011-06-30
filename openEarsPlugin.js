@@ -29,6 +29,12 @@ OpenEarsPlugin.prototype.changeLanguageModelToFile = function(options){
     PhoneGap.exec('openEarsPlugin.pocketsphinxControllerChangeLanguageModelToFile', options.languagemodel, options.dictionary);
 }
 
+OpenEarsPlugin.prototype.generateLanguageModel = function(languageArrayCSV){
+    this.log("openEarsPLugin.js, generating language model");
+    PhoneGap.exec('openEarsPlugin.languageModelGeneratorGenerateLanguageModelFromArray',languageArrayCSV);
+}
+
+
 OpenEarsPlugin.prototype.stopListening = function(){
     this.log('Stopping Listening.');
     PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStopListening','foo');

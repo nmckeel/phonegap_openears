@@ -29,7 +29,6 @@
               , dictionary: 'rhymbes1.dic'
             }
             openears.startAudioSession();
-            openears.startListeningWithLanguageModelAtPath(options);
                            
             function change_language_model(){
               var options = {
@@ -39,11 +38,19 @@
               openears.changeLanguageModelToFile(options);
             }
             
+            function generate_language_model(){
+              // Generate and switch to a new language model
+              var languageArrayCSV = "I,AM,HUNGRY,WHAT,IS,FOR,LUNCH";
+              openears.generateLanguageModel(languageArrayCSV);
+            }
+                           
+            //openears.startListeningWithLanguageModelAtPath(options);
             //openears.suspendRecognition();
             //openears.resumeRecognition();
             //openears.stopListening();
             
             $('#change').click(change_language_model);
+            $('#generate').click(generate_language_model);
             
           });
         })    
@@ -51,6 +58,7 @@
       </script>    
   </head>
   <body>
-    <span id="change">Change Language Model</span>
+    <span style="font-size:2em" id="change">Change Language Model</span>
+    <BR/><span style="font-size:2em" id="generate">Generate Language Model</span>
   </body>
 </html>
