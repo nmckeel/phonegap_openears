@@ -4,6 +4,11 @@
 var OpenEarsPlugin = function() {};
 
 OpenEarsPlugin.prototype.callbacks = {};
+OpenEarsPlugin.hypothesis = {};
+
+OpenEarsPlugin.prototype.isValidHypothesis = function(hypothesis){
+    return hypothesis != '' && hypothesis != '(null)';
+}
 
 OpenEarsPlugin.prototype.setCallback = function(name, fn){
     OpenEarsPlugin.prototype.callbacks[name] = fn;
@@ -15,39 +20,32 @@ OpenEarsPlugin.prototype.log = function(msg){
 };
 
 OpenEarsPlugin.prototype.startAudioSession = function(){
-    this.log('Starting Audio Session.');
     PhoneGap.exec('openEarsPlugin.startAudioSession');
 };
 
 OpenEarsPlugin.prototype.startListeningWithLanguageModelAtPath = function(options){
-    this.log('Starting Listening.');
-    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStartListeningWithLanguageModelAtPath',options.languagemodel, options.dictionary);
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStartListeningWithLanguageModelAtPath',options.languagemodel, options.dictionary, options);
 };
 
 OpenEarsPlugin.prototype.changeLanguageModelToFile = function(options){
-    this.log("openEarsPLugin.js, Changing Language Model to "+options.languagemodel);
     PhoneGap.exec('openEarsPlugin.pocketsphinxControllerChangeLanguageModelToFile', options.languagemodel, options.dictionary);
 }
 
 OpenEarsPlugin.prototype.generateLanguageModel = function(languageArrayCSV){
-    this.log("openEarsPLugin.js, generating language model");
     PhoneGap.exec('openEarsPlugin.languageModelGeneratorGenerateLanguageModelFromArray',languageArrayCSV);
 }
 
 
 OpenEarsPlugin.prototype.stopListening = function(){
-    this.log('Stopping Listening.');
-    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStopListening','foo');
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerStopListening');
 };
 
 OpenEarsPlugin.prototype.suspendRecognition = function(){
-    this.log('Suspending Recognition.');
-    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerSuspendRecognition','foo');
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerSuspendRecognition');
 };
 
 OpenEarsPlugin.prototype.resumeRecognition = function(){
-    this.log('Resuming Recognition.');
-    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerResumeRecognition','foo');
+    PhoneGap.exec('openEarsPlugin.pocketsphinxControllerResumeRecognition');
 };
 
 OpenEarsPlugin.prototype.say = function(phrase){
@@ -58,6 +56,53 @@ OpenEarsPlugin.prototype.say = function(phrase){
 PhoneGap.addConstructor(function() {
     if(!window.plugins){window.plugins = {};}
     window.plugins.openEarsPlugin = new OpenEarsPlugin();
+    
+    // Did start listening
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidStartListening', function(){
+        $(document).trigger('didstartlistening');
+    });
+
+    // Did stop listening
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidStopListening', function(){
+        $(document).trigger('didstoplistening');
+    });
+
+    // Did detect speech
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidDetectSpeech', function(){
+	$(document).trigger('diddetectspeech');
+    });
+
+    // Did detect finished speech
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidDetectFinishedSpeech', function(){
+	$(document).trigger('diddetectfinishedspeech');
+    });
+
+    // Did change language model
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidChangeLanguageModelToFile', function(){
+	$(document).trigger('didchangelanguagemodel');
+    });
+
+    // Did receive hypothesis
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidReceiveHypothesis', function(hypothesis, recognitionScore, utteranceID){
+	window.plugins.openEarsPlugin.hypothesis = {
+                hypothesis: hypothesis
+            ,   recognitionScore: recognitionScore
+            ,   utteranceID: utteranceID
+        }
+        $(document).trigger('didreceivehypothesis');
+    });
+
+    // Did suspend recognition
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidSuspendRecognition', function(){
+	$(document).trigger('didsuspendrecognition');
+    });
+
+    // Did resume recognition
+    window.plugins.openEarsPlugin.setCallback('pocketsphinxDidResumeRecognition', function(){
+	$(document).trigger('didresumerecognition');
+    });
+    
+    
 });
 
 

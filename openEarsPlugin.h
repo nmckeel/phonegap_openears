@@ -21,6 +21,7 @@
     FliteController *flite_controller;
     LanguageModelGenerator *language_model_generator;
     
+    NSNumber *started_listening; // 1, 0 (yes, no)
     NSString *current_language_model;
     NSString *current_dictionary;
     NSString *path_to_dynamic_language_model;
@@ -33,6 +34,7 @@
 @property (nonatomic, retain) FliteController *flite_controller;
 @property (nonatomic, retain) LanguageModelGenerator *language_model_generator;
 
+@property (nonatomic, retain) NSNumber *started_listening;
 @property (nonatomic, retain) NSString *current_language_model;
 @property (nonatomic, retain) NSString *current_dictionary;
 @property (nonatomic, retain) NSString *path_to_dynamic_language_model;
