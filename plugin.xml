@@ -28,7 +28,7 @@
 
         <source-file src="src/ios/openEarsPlugin.mm" />
 
-        <header-file src="src/ios/Headers/openEarsPlugin.h" />
+        <header-file src="src/ios/openEarsPlugin.h" />
 
         <framework src="AudioToolbox.framework" />
         <framework src="SystemConfiguration.framework" />
