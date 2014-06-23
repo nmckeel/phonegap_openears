@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="com.tt.openEars"
+    version="1">
+
+    <name>openEars</name>
+  <author>nom</author>
+
+  <description>
+   This plugin makes possible to use openEars library in phonegap projects, so you can use Text To Speech and Speech Recognition
+  </description>
+
+  <js-module src="www/js/openEarsPlugin.js" name="openEars">
+      <clobbers target="openEars" />
+  </js-module>
+
+  <engines>
+      <engine name="cordova" version="&gt;=3.0.0" />
+  </engines>
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+          <feature name="openEars">
+            <param name="ios-package" value="openEars"/>
+          </feature>
+        </config-file>
+
+        <source-file src="src/ios/openEarsPlugin.mm" />
+
+        <header-file src="src/ios/Headers/openEarsPlugin.h" />
+
+        <framework src="AudioToolbox.framework" />
+        <framework src="SystemConfiguration.framework" />
+        <framework src="Security.framework" />
+        <framework src="CFNetwork.framework" />
+
+    </platform>
+</plugin>
